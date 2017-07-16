@@ -37,7 +37,7 @@ def update_route53_zone(service, ips):
                 [record['Value'] for record in service_record_set[0]['ResourceRecords']]
             )
         )
-    if ips_changed or not service_record_set:
+    if not service_record_set or ips_changed:
         response_create = client.change_resource_record_sets(
             HostedZoneId=CONSUL_ROUTE53_ZONE_ID,
             ChangeBatch={
