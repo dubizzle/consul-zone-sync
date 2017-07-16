@@ -25,7 +25,7 @@ def update_route53_zone(service, ips):
     zone = filter(
         lambda x: x['Id']=='/hostedzone/%s' % CONSUL_ROUTE53_ZONE_ID,
         client.list_hosted_zones()['HostedZones']
-    )[0]
+    ).next()
     service_record_name = '%s.%s' % (service, zone['Name'])
     service_record_set = filter(
         lambda x: x['Name'] == service_record_name, 
