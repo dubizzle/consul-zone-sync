@@ -34,10 +34,8 @@ def update_route53_zone(service, ips):
     ))
     if service_record_set:
         print(service_record_set[0])
-        ips_changed = bool(
-            set(ips) - set(
-                [record['Value'] for record in service_record_set[0]['ResourceRecords']]
-            )
+        ips_changed = set(ips) == set(
+            [record['Value'] for record in service_record_set[0]['ResourceRecords']]
         )
     if not service_record_set or ips_changed:
         response_create = client.change_resource_record_sets(
