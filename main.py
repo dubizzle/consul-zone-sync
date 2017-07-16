@@ -9,15 +9,14 @@ CONSUL_ROUTE53_ZONE_ID = os.getenv('CONSUL_ROUTE53_ZONE_ID', 'Z1D8B4ETKDC02C')
 
 @asyncio.coroutine
 def watch_healthy_services():
-    services = requests.get(
-        '%s%s' % (CONSUL_API_URL,'/v1/catalog/services')
-    ).json().keys()
-    for service in services:
-        ips = [node['Address'] for node in requests.get(
-            '%s%s' % (CONSUL_API_URL,'/v1/catalog/service/%s' % service)
-        ).json()]
-        print('Found service:%s with ips:%s' % (service, ips))
-        update_route53_zone(service, ips)
+    while True:
+        services = requests.get(
+            '%s%s' % (CONSUL_API_URL,'/v1/catalog/services')
+        ).json().keys()
+        for service in services:
+            ips = ['172.30.31.254', '172.30.32.119', '172.30.30.172']
+            print('Found service:%s with ips:%s' % (service, ips))
+            update_route53_zone(service, ips)
 
 
 def update_route53_zone(service, ips):
@@ -28,7 +27,7 @@ def update_route53_zone(service, ips):
     ))[0]
     service_record_name = '%s.%s' % (service, zone['Name'])
     service_record_set = list(filter(
-        lambda x: x['Name'] == service_record_name, 
+        lambda x: x['Name'] == service_record_name,
         client.list_resource_record_sets(HostedZoneId=CONSUL_ROUTE53_ZONE_ID)['ResourceRecordSets']
     ))
     if service_record_set:
