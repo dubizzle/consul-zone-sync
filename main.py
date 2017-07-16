@@ -32,6 +32,7 @@ def update_route53_zone(service, ips):
         client.list_resource_record_sets(HostedZoneId=CONSUL_ROUTE53_ZONE_ID)['ResourceRecordSets']
     ))
     if service_record_set:
+        print(service_record_set[0])
         ips_changed = bool(
             set(ips) - set(
                 [record['Value'] for record in service_record_set[0]['ResourceRecords']]
