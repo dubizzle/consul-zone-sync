@@ -14,7 +14,9 @@ def watch_healthy_services():
             '%s%s' % (CONSUL_API_URL,'/v1/catalog/services')
         ).json().keys()
         for service in services:
-            ips = ['172.30.31.254', '172.30.32.119', '172.30.30.172']
+            ips = [node['Address'] for node in requests.get(
+                '%s%s' % (CONSUL_API_URL,'/v1/catalog/service/%s' % service)
+            ).json()]
             print('Found service:%s with ips:%s' % (service, ips))
             update_route53_zone(service, ips)
 
