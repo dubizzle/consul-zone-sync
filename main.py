@@ -18,7 +18,33 @@ def watch_healthy_services():
                 '%s%s' % (CONSUL_API_URL,'/v1/catalog/service/%s' % service)
             ).json()]
             update_route53_zone(service, ips)
+            clean_old_entries(services)
         yield from asyncio.sleep(2)
+
+def clean_old_entries(services):
+    client = boto3.client("route53")
+    zone = list(filter(
+        lambda x: x['Id']=='/hostedzone/%s' % CONSUL_ROUTE53_ZONE_ID,
+        client.list_hosted_zones()['HostedZones']
+    ))[0]
+    for record in client.list_resource_record_sets(
+        HostedZoneId=CONSUL_ROUTE53_ZONE_ID
+    )['ResourceRecordSets']:
+        if record['Type'] == 'A' and not any(record['Name'].startswith(service) for service in services):
+            print('Deleting stale record for service %s' % record['Name'].split('.')[0])
+            print('Updating service %s with new ips %s' % (service, ips))
+            response_create = client.change_resource_record_sets(
+                HostedZoneId=CONSUL_ROUTE53_ZONE_ID,
+                ChangeBatch={
+                    'Comment': 'Deleting Resource Record set',
+                    'Changes': [{
+                        'Action': 'DELETE',
+                        'Name': record['Name'][:-1],
+                        'Type': 'A',
+                    }
+                    }]
+                }
+
 
 
 def update_route53_zone(service, ips):
@@ -55,6 +81,7 @@ def update_route53_zone(service, ips):
             }
 
         )
+
     return
 
 loop = asyncio.get_event_loop()
