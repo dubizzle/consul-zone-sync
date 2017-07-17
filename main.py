@@ -32,7 +32,6 @@ def clean_old_entries(services):
     )['ResourceRecordSets']:
         if record['Type'] == 'A' and not any(record['Name'].startswith(service) for service in services):
             print('Deleting stale record for service %s' % record['Name'].split('.')[0])
-            print('Updating service %s with new ips %s' % (service, ips))
             response_delete = client.change_resource_record_sets(
                 HostedZoneId=CONSUL_ROUTE53_ZONE_ID,
                 ChangeBatch={
