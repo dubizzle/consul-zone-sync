@@ -33,19 +33,16 @@ def clean_old_entries(services):
         if record['Type'] == 'A' and not any(record['Name'].startswith(service) for service in services):
             print('Deleting stale record for service %s' % record['Name'].split('.')[0])
             print('Updating service %s with new ips %s' % (service, ips))
-            response_create = client.change_resource_record_sets(
+            response_delete = client.change_resource_record_sets(
                 HostedZoneId=CONSUL_ROUTE53_ZONE_ID,
                 ChangeBatch={
-                    'Comment': 'Deleting Resource Record set',
+                    'Comment': 'Updating Resource Record set',
                     'Changes': [{
                         'Action': 'DELETE',
-                        'Name': record['Name'][:-1],
-                        'Type': 'A',
-                    }
+                        'ResourceRecordSet': record
                     }]
                 }
-
-
+            )
 
 def update_route53_zone(service, ips):
     client = boto3.client("route53")
