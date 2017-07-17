@@ -17,7 +17,6 @@ def watch_healthy_services():
             ips = [node['Address'] for node in requests.get(
                 '%s%s' % (CONSUL_API_URL,'/v1/catalog/service/%s' % service)
             ).json()]
-            print('Found service:%s with ips:%s' % (service, ips))
             update_route53_zone(service, ips)
         yield from asyncio.sleep(2)
 
@@ -34,7 +33,6 @@ def update_route53_zone(service, ips):
         client.list_resource_record_sets(HostedZoneId=CONSUL_ROUTE53_ZONE_ID)['ResourceRecordSets']
     ))
     if service_record_set:
-        print(service_record_set[0])
         ips_changed = not (set(ips) == set(
             [record.get('Value') for record in service_record_set[0]['ResourceRecords']]
         ))
