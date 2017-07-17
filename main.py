@@ -19,6 +19,7 @@ def watch_healthy_services():
             ).json()]
             print('Found service:%s with ips:%s' % (service, ips))
             update_route53_zone(service, ips)
+        yield from asyncio.sleep(2)
 
 
 def update_route53_zone(service, ips):
@@ -35,9 +36,11 @@ def update_route53_zone(service, ips):
     if service_record_set:
         print(service_record_set[0])
         ips_changed = not (set(ips) == set(
-            [record['Value'] for record in service_record_set[0]['ResourceRecords']]
+            [record.get('Value') for record in service_record_set[0]['ResourceRecords']]
         ))
+
     if not service_record_set or ips_changed:
+        print('Updating service %s with new ips %s' % (service, ips))
         response_create = client.change_resource_record_sets(
             HostedZoneId=CONSUL_ROUTE53_ZONE_ID,
             ChangeBatch={
@@ -57,6 +60,7 @@ def update_route53_zone(service, ips):
     return
 
 loop = asyncio.get_event_loop()
-asyncio.async(watch_healthy_services())
-loop.run_forever()
-
+try:
+    loop.run_until_complete(watch_healthy_services())
+finally:
+    loop.close()
