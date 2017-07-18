@@ -6,7 +6,7 @@ import requests
 import boto3
 
 CONSUL_API_URL = os.getenv('CONSUL_API_URL', 'http://localhost:8500')
-CONSUL_ROUTE53_ZONE_ID = os.getenv('CONSUL_ROUTE53_ZONE_ID', 'Z1D8B4ETKDC02C')
+CONSUL_ROUTE53_ZONE_ID = os.getenv('CONSUL_ROUTE53_ZONE_ID', 'ZXXXXXXXXXX')
 
 @asyncio.coroutine
 def watch_healthy_services():
