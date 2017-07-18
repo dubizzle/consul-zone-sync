@@ -7,3 +7,5 @@ RUN set -e; \
     pip install -r /tmp/requirements.txt;
 
 ADD docker/archive.tar.gz /opt
+
+CMD ["python", "/opt/main.py"]
