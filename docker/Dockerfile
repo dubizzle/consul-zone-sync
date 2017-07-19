@@ -8,4 +8,4 @@ RUN set -e; \
 
 ADD docker/archive.tar.gz /opt
 
-CMD ["python", "/opt/main.py"]
+CMD ["python", "-u",  "/opt/main.py"]

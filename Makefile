@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 GIT_BRANCH := $(shell git branch | sed -n -e 's/^\* \(.*\)/\1/p')
-IMAGE_NAME ?= dubizzledotcom/consul-zone-sync
+IMAGE_NAME ?= ahmed/consul-zone-sync
 IMAGE_VERSION ?= $(shell docker/tag_helper.sh)
 SOURCE_BUNDLE_ARCHIVE_NAME = consul-zone-sync-$(IMAGE_VERSION).zip
 REFRESH_CODE ?= 'yes'
