@@ -14,6 +14,7 @@ def watch_healthy_services():
         services = requests.get(
             '%s%s' % (CONSUL_API_URL,'/v1/catalog/services')
         ).json().keys()
+        print('Found %s services' % services)
         for service in services:
             ips = [node['Address'] for node in requests.get(
                 '%s%s' % (CONSUL_API_URL,'/v1/catalog/service/%s' % service)
