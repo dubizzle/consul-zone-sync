@@ -9,3 +9,6 @@ RUN set -e; \
 ADD docker/archive.tar.gz /opt
 
 CMD ["python", "-u",  "/opt/main.py"]
+
+HEALTHCHECK --interval=5s --timeout=3s \
+CMD if pgrep -f  'python -u /opt/main.py'; then exit 0; else exit 1; fi
