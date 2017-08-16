@@ -18,6 +18,7 @@ def watch_healthy_services():
             ips = [node['Address'] for node in requests.get(
                 '%s%s' % (CONSUL_API_URL,'/v1/catalog/service/%s' % service)
             ).json()]
+            ips = list(set(ips))
             update_route53_zone(service, ips)
             clean_old_entries(services)
         yield from asyncio.sleep(2)
