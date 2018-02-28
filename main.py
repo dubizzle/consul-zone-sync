@@ -11,17 +11,20 @@ CONSUL_ROUTE53_ZONE_ID = os.getenv('CONSUL_ROUTE53_ZONE_ID', 'ZXXXXXXXXXX')
 @asyncio.coroutine
 def watch_healthy_services():
     while True:
-        services = requests.get(
-            '%s%s' % (CONSUL_API_URL,'/v1/catalog/services')
-        ).json().keys()
-        for service in services:
-            ips = [node['Node']['Address'] for node in requests.get(
-                '%s%s' % (CONSUL_API_URL,'/v1/health/service/%s?passing' % service)
-            ).json()]
-            ips = list(set(ips))
-            update_route53_zone(service, ips)
-            clean_old_entries(services)
-        yield from asyncio.sleep(2)
+        try:
+            services = requests.get(
+                '%s%s' % (CONSUL_API_URL,'/v1/catalog/services')
+            ).json().keys()
+            for service in services:
+                ips = [node['Node']['Address'] for node in requests.get(
+                    '%s%s' % (CONSUL_API_URL,'/v1/health/service/%s?passing' % service)
+                ).json()]
+                ips = list(set(ips))
+                update_route53_zone(service, ips)
+                clean_old_entries(services)
+            yield from asyncio.sleep(2)
+        except Exception as e:
+            #print("Something went wrong %s" % e)
 
 def clean_old_entries(services):
     client = boto3.client("route53")
@@ -33,7 +36,7 @@ def clean_old_entries(services):
         HostedZoneId=CONSUL_ROUTE53_ZONE_ID
     )['ResourceRecordSets']:
         if record['Type'] == 'A' and not any(record['Name'].startswith(service) for service in services):
-            print('Deleting stale record for service %s' % record['Name'].split('.')[0])
+            #print('Deleting stale record for service %s' % record['Name'].split('.')[0])
             response_delete = client.change_resource_record_sets(
                 HostedZoneId=CONSUL_ROUTE53_ZONE_ID,
                 ChangeBatch={
@@ -62,7 +65,7 @@ def update_route53_zone(service, ips):
         ))
 
     if not service_record_set or ips_changed:
-        print('Updating service %s with new ips %s' % (service, ips))
+        #print('Updating service %s with new ips %s' % (service, ips))
         response_create = client.change_resource_record_sets(
             HostedZoneId=CONSUL_ROUTE53_ZONE_ID,
             ChangeBatch={
