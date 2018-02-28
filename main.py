@@ -24,6 +24,7 @@ def watch_healthy_services():
                 clean_old_entries(services)
             yield from asyncio.sleep(2)
         except Exception as e:
+            pass
             #print("Something went wrong %s" % e)
 
 def clean_old_entries(services):
